@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sushiro Point Optimizer</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #111827;
+      --green: #16a34a;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --blue: #2563eb;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 16px 14px 96px;
+    }
+
+    .hero {
+      padding: 10px 2px 14px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .summary {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(250, 250, 250, 0.92);
+      backdrop-filter: blur(12px);
+      padding: 8px 0 12px;
+    }
+
+    .summary-card {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .main-total {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .total-number {
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+    }
+
+    .baht {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-left: 3px;
+    }
+
+    .points-pill {
+      padding: 9px 12px;
+      background: #111827;
+      color: white;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mini-box {
+      background: #f3f4f6;
+      border-radius: 16px;
+      padding: 10px;
+    }
+
+    .mini-box strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 18px;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+    }
+
+    .progress-line {
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #111827;
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .section {
+      margin-top: 18px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 17px;
+      font-weight: 850;
+      letter-spacing: -0.2px;
+    }
+
+    .plate-card {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(17, 24, 39, 0.04);
+    }
+
+    .plate-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .plate-dot {
+      width: 35px;
+      height: 35px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,0.12);
+      flex: 0 0 auto;
+    }
+
+    .plate-name {
+      font-weight: 850;
+      font-size: 16px;
+    }
+
+    .plate-price {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .counter {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .btn-round {
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 999px;
+      font-size: 22px;
+      font-weight: 900;
+      color: white;
+      background: #111827;
+      cursor: pointer;
+    }
+
+    .count {
+      width: 32px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .white { background: #ffffff; border-color: #d1d5db; }
+    .red { background: #fee2e2; border-color: #ef4444; }
+    .silver { background: #f3f4f6; border-color: #9ca3af; }
+    .gold { background: #fef3c7; border-color: #f59e0b; }
+    .black { background: #111827; border-color: #374151; color: white; }
+
+    .dot-white { background: #ffffff; }
+    .dot-red { background: #ef4444; }
+    .dot-silver { background: linear-gradient(135deg, #f9fafb, #9ca3af); }
+    .dot-gold { background: linear-gradient(135deg, #fde68a, #f59e0b); }
+    .dot-black { background: #111827; border-color: #6b7280; }
+
+    .black .plate-price { color: #d1d5db; }
+
+    .settings-card, .custom-card, .result-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 4px 16px rgba(17, 24, 39, 0.04);
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 750;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 12px;
+      font-size: 16px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    .custom-row {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 0.8fr 42px;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .remove-btn {
+      height: 42px;
+      border: none;
+      border-radius: 14px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-weight: 900;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .wide-btn {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 16px;
+      background: #111827;
+      color: white;
+      font-weight: 850;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .secondary-btn {
+      background: #f3f4f6;
+      color: #111827;
+      border: 1px solid var(--line);
+    }
+
+    .result-card {
+      margin-bottom: 10px;
+    }
+
+    .result-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .badge.green { background: #dcfce7; color: #166534; }
+    .badge.amber { background: #fef3c7; color: #92400e; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+
+    .result-title {
+      font-size: 17px;
+      font-weight: 900;
+      margin: 0 0 5px;
+    }
+
+    .result-items {
+      margin: 8px 0 0;
+      color: var(--text);
+      font-weight: 750;
+      line-height: 1.5;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .result-metric {
+      background: #f9fafb;
+      border-radius: 15px;
+      padding: 10px;
+    }
+
+    .result-metric span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .result-metric strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .warning {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 750;
+      margin-bottom: 10px;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      background: #f9fafb;
+      border: 1px dashed #d1d5db;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .bottom-actions {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      width: min(492px, calc(100% - 28px));
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      z-index: 20;
+    }
+
+    .bottom-actions button {
+      height: 52px;
+      border-radius: 18px;
+      border: none;
+      font-size: 15px;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    .reset {
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid var(--line) !important;
+    }
+
+    .jump {
+      background: #111827;
+      color: white;
+    }
+
+    @media (max-width: 360px) {
+      .total-number { font-size: 36px; }
+      .btn-round { width: 38px; height: 38px; }
+      .custom-row { grid-template-columns: 1fr 0.7fr 0.65fr 38px; gap: 6px; }
+      input, select { font-size: 15px; padding: 0 9px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <h1>🍣 Sushiro Point Optimizer</h1>
+      <p>คำนวณยอดจ่ายจริง + แนะนำกินเพิ่มให้แต้มคุ้มทุก 100 บาท</p>
+    </header>
+
+    <section class="summary">
+      <div class="summary-card">
+        <div class="main-total">
+          <div>
+            <div class="label">ยอดจ่ายจริง</div>
+            <div><span id="realTotal" class="total-number">0</span><span class="baht">บาท</span></div>
+          </div>
+          <div id="pointPill" class="points-pill">0 แต้ม</div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-box">
+            <div class="label">ก่อน Service</div>
+            <strong><span id="subtotal">0</span></strong>
+          </div>
+          <div class="mini-box">
+            <div class="label">Service 10%</div>
+            <strong><span id="service">0</span></strong>
+          </div>
+          <div class="mini-box">
+            <div class="label">ขาดอีก</div>
+            <strong><span id="needMore">100</span></strong>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-line"><div id="progressBar" class="progress-bar"></div></div>
+          <div class="progress-text">
+            <span id="currentHundred">0</span>
+            <span id="nextHundred">100</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">จำนวนจาน</h2>
+      <div id="plates"></div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">เมนูอื่น ๆ</h2>
+      <div class="custom-card">
+        <div id="customItems"></div>
+        <button class="wide-btn secondary-btn" onclick="addCustomItem()">+ เพิ่มเมนูเอง</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">ตั้งค่าแนะนำ</h2>
+      <div class="settings-card">
+        <div class="field">
+          <label>เกินหลักร้อยได้ไม่เกินกี่บาท</label>
+          <input id="overLimit" type="number" min="0" value="30" oninput="calculate()" />
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>เรียงผลลัพธ์ตาม</label>
+          <select id="optimizeBy" onchange="calculate()">
+            <option value="best">คุ้มสุด</option>
+            <option value="leastOver">เกินเป้าน้อยสุด</option>
+            <option value="leastMoney">เพิ่มเงินน้อยสุด</option>
+            <option value="leastPlate">จำนวนจานน้อยสุด</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="resultsSection">
+      <h2 class="section-title">🎯 ตัวเลือกกินเพิ่ม</h2>
+      <div id="warningBox"></div>
+      <div id="results"></div>
+    </section>
+  </main>
+
+  <div class="bottom-actions">
+    <button class="reset" onclick="resetAll()">รีเซ็ต</button>
+    <button class="jump" onclick="document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'})">ดูคำแนะนำ</button>
+  </div>
+
+  <script>
+    const plates = [
+      { key: "white", name: "จานขาว", price: 30, cls: "white", dot: "dot-white" },
+      { key: "red", name: "จานแดง", price: 40, cls: "red", dot: "dot-red" },
+      { key: "silver", name: "จานเงิน", price: 60, cls: "silver", dot: "dot-silver" },
+      { key: "gold", name: "จานทอง", price: 80, cls: "gold", dot: "dot-gold" },
+      { key: "black", name: "จานดำ", price: 100, cls: "black", dot: "dot-black" }
+    ];
+
+    let counts = {};
+    let customItems = [];
+
+    plates.forEach(p => counts[p.key] = 0);
+
+    function money(n) {
+      return Math.round(n).toLocaleString("th-TH");
+    }
+
+    function realTotalFromSubtotal(subtotal) {
+      return subtotal * 1.10;
+    }
+
+    function renderPlates() {
+      const box = document.getElementById("plates");
+      box.innerHTML = plates.map(p => `
+        <div class="plate-card ${p.cls}">
+          <div class="plate-left">
+            <div class="plate-dot ${p.dot}"></div>
+            <div>
+              <div class="plate-name">${p.name}</div>
+              <div class="plate-price">${p.price} บาท</div>
+            </div>
+          </div>
+          <div class="counter">
+            <button class="btn-round" onclick="changeCount('${p.key}', -1)">−</button>
+            <div class="count" id="count-${p.key}">${counts[p.key]}</div>
+            <button class="btn-round" onclick="changeCount('${p.key}', 1)">+</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function changeCount(key, delta) {
+      counts[key] = Math.max(0, counts[key] + delta);
+      document.getElementById(`count-${key}`).textContent = counts[key];
+      calculate();
+    }
+
+    function addCustomItem() {
+      customItems.push({ name: "", price: 0, qty: 1 });
+      renderCustomItems();
+      calculate();
+    }
+
+    function updateCustom(index, field, value) {
+      if (field === "name") customItems[index].name = value;
+      if (field === "price") customItems[index].price = Math.max(0, Number(value || 0));
+      if (field === "qty") customItems[index].qty = Math.max(0, Number(value || 0));
+      calculate();
+    }
+
+    function removeCustomItem(index) {
+      customItems.splice(index, 1);
+      renderCustomItems();
+      calculate();
+    }
+
+    function renderCustomItems() {
+      const box = document.getElementById("customItems");
+      if (customItems.length === 0) {
+        box.innerHTML = `<div class="empty">เพิ่มเมนูที่ไม่ใช่จานสี เช่น น้ำ ของหวาน ราเมน หรือเมนูพิเศษ</div>`;
+        return;
+      }
+
+      box.innerHTML = customItems.map((item, i) => `
+        <div class="custom-row">
+          <input placeholder="ชื่อเมนู" value="${item.name}" oninput="updateCustom(${i}, 'name', this.value)" />
+          <input type="number" min="0" placeholder="ราคา" value="${item.price || ""}" oninput="updateCustom(${i}, 'price', this.value)" />
+          <input type="number" min="0" placeholder="จำนวน" value="${item.qty}" oninput="updateCustom(${i}, 'qty', this.value)" />
+          <button class="remove-btn" onclick="removeCustomItem(${i})">×</button>
+        </div>
+      `).join("");
+    }
+
+    function getSubtotal() {
+      let subtotal = 0;
+      plates.forEach(p => subtotal += counts[p.key] * p.price);
+      customItems.forEach(item => subtotal += (Number(item.price) || 0) * (Number(item.qty) || 0));
+      return subtotal;
+    }
+
+    function findOptions(currentSubtotal, target, overLimit) {
+      const options = [];
+      const maxEach = 10;
+
+      for (let w = 0; w <= maxEach; w++) {
+        for (let r = 0; r <= maxEach; r++) {
+          for (let s = 0; s <= maxEach; s++) {
+            for (let g = 0; g <= maxEach; g++) {
+              for (let b = 0; b <= maxEach; b++) {
+                const combo = [w, r, s, g, b];
+                const totalPlates = combo.reduce((a, c) => a + c, 0);
+                if (totalPlates === 0) continue;
+
+                const addSubtotal = combo.reduce((sum, c, i) => sum + c * plates[i].price, 0);
+                const newSubtotal = currentSubtotal + addSubtotal;
+                const newReal = realTotalFromSubtotal(newSubtotal);
+                const over = newReal - target;
+
+                if (newReal >= target) {
+                  const items = combo
+                    .map((c, i) => c > 0 ? `${plates[i].name.replace("จาน", "")} ${c} จาน` : "")
+                    .filter(Boolean);
+
+                  options.push({
+                    items,
+                    addSubtotal,
+                    newSubtotal,
+                    newReal,
+                    points: Math.floor(newReal / 100),
+                    over,
+                    totalPlates,
+                    withinLimit: over <= overLimit
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      const unique = new Map();
+      options.forEach(o => {
+        const key = o.items.join("|");
+        if (!unique.has(key)) unique.set(key, o);
+      });
+
+      return Array.from(unique.values());
+    }
+
+    function sortOptions(options, mode) {
+      return options.sort((a, b) => {
+        if (mode === "leastOver") {
+          return a.over - b.over || a.addSubtotal - b.addSubtotal || a.totalPlates - b.totalPlates;
+        }
+        if (mode === "leastMoney") {
+          return a.addSubtotal - b.addSubtotal || a.over - b.over || a.totalPlates - b.totalPlates;
+        }
+        if (mode === "leastPlate") {
+          return a.totalPlates - b.totalPlates || a.over - b.over || a.addSubtotal - b.addSubtotal;
+        }
+
+        return (a.withinLimit === b.withinLimit ? 0 : a.withinLimit ? -1 : 1)
+          || a.over - b.over
+          || a.addSubtotal - b.addSubtotal
+          || a.totalPlates - b.totalPlates;
+      });
+    }
+
+    function calculate() {
+      const subtotal = getSubtotal();
+      const service = subtotal * 0.10;
+      const realTotal = realTotalFromSubtotal(subtotal);
+      const points = Math.floor(realTotal / 100);
+      const currentHundred = points * 100;
+      const nextHundred = (points + 1) * 100;
+      const needMore = Math.max(0, nextHundred - realTotal);
+      const progress = ((realTotal - currentHundred) / 100) * 100;
+
+      document.getElementById("subtotal").textContent = money(subtotal);
+      document.getElementById("service").textContent = money(service);
+      document.getElementById("realTotal").textContent = money(realTotal);
+      document.getElementById("pointPill").textContent = `${points} แต้ม`;
+      document.getElementById("needMore").textContent = money(needMore);
+      document.getElementById("currentHundred").textContent = money(currentHundred);
+      document.getElementById("nextHundred").textContent = money(nextHundred);
+      document.getElementById("progressBar").style.width = `${Math.min(100, Math.max(0, progress))}%`;
+
+      const overLimit = Number(document.getElementById("overLimit").value || 30);
+      const optimizeBy = document.getElementById("optimizeBy").value;
+
+      let options = findOptions(subtotal, nextHundred, overLimit);
+      const within = options.filter(o => o.withinLimit);
+      const source = within.length ? within : options;
+
+      document.getElementById("warningBox").innerHTML = within.length ? "" : `
+        <div class="warning">⚠️ ไม่มีตัวเลือกที่เกินไม่เกิน ${money(overLimit)} บาท จึงแสดงตัวเลือกที่ใกล้ที่สุดแทน</div>
+      `;
+
+      const sorted = sortOptions(source, optimizeBy).slice(0, 50);
+      renderResults(sorted, nextHundred, overLimit);
+    }
+
+    function renderResults(options, target, overLimit) {
+      const box = document.getElementById("results");
+
+      if (!options.length) {
+        box.innerHTML = `<div class="empty">เริ่มกดจำนวนจาน หรือเพิ่มเมนูเอง แล้วระบบจะแนะนำตัวเลือกให้ทันที</div>`;
+        return;
+      }
+
+      box.innerHTML = options.map((o, i) => {
+        const badgeClass = o.over <= 10 ? "green" : o.over <= overLimit ? "amber" : "red";
+        const badgeText = o.over <= overLimit ? `เกิน ${money(o.over)} บาท` : `เกินเงื่อนไข ${money(o.over)} บาท`;
+
+        return `
+          <div class="result-card">
+            <div class="result-top">
+              <div>
+                <p class="result-title">${i === 0 ? "⭐ ตัวเลือกแนะนำ" : `ตัวเลือก ${i + 1}`}</p>
+                <div class="result-items">${o.items.join(" + ")}</div>
+              </div>
+              <span class="badge ${badgeClass}">${badgeText}</span>
+            </div>
+
+            <div class="result-grid">
+              <div class="result-metric">
+                <span>เพิ่มก่อน Service</span>
+                <strong>${money(o.addSubtotal)} บาท</strong>
+              </div>
+              <div class="result-metric">
+                <span>ยอดก่อน Service ใหม่</span>
+                <strong>${money(o.newSubtotal)} บาท</strong>
+              </div>
+              <div class="result-metric">
+                <span>ยอดจ่ายจริงใหม่</span>
+                <strong>${money(o.newReal)} บาท</strong>
+              </div>
+              <div class="result-metric">
+                <span>แต้มใหม่</span>
+                <strong>${o.points} แต้ม</strong>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function resetAll() {
+      plates.forEach(p => counts[p.key] = 0);
+      customItems = [];
+      renderPlates();
+      renderCustomItems();
+      calculate();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    renderPlates();
+    renderCustomItems();
+    calculate();
+  </script>
+</body>
+</html>
